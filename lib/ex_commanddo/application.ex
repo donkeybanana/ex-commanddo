@@ -1,19 +1,21 @@
 defmodule ExCommanddo.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
 
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: ExCommanddo.Worker.start_link(arg)
-      # {ExCommanddo.Worker, arg}
+      {ExCommanddo.Producer, interval: 5_000, jobs: 1..10_000 |> Enum.to_list()}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
+    workers =
+      1..100
+      |> Enum.to_list()
+      |> Enum.map(fn id ->
+        %{id: id, start: {ExCommanddo.Consumer, :start_link, [[concurrency: 1]]}}
+      end)
+
     opts = [strategy: :one_for_one, name: ExCommanddo.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children ++ workers, opts)
   end
 end
