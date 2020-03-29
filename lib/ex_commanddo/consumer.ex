@@ -3,8 +3,8 @@ defmodule ExCommanddo.Consumer do
 
   @concurrency 1
 
-  def start_link(opts) do
-    concurrency = opts[:concurrency] || @concurrency
+  def start_link(concurrency: concurrency) do
+    concurrency = concurrency || @concurrency
 
     GenStage.start_link(__MODULE__, concurrency)
   end
@@ -18,19 +18,12 @@ defmodule ExCommanddo.Consumer do
     tasks =
       for event <- events do
         Task.async(fn ->
-          cmd(event)
+          event.cmd.(event)
         end)
       end
 
     _ = Task.yield_many(tasks, :infinity)
 
     {:noreply, [], state}
-  end
-
-  defp cmd(event) do
-    # @TODO actual work
-    Process.sleep(51)
-
-    event
   end
 end

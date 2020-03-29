@@ -5,7 +5,7 @@ defmodule ExCommanddo.Application do
 
   def start(_type, _args) do
     children = [
-      {ExCommanddo.Producer, interval: 5_000, jobs: 1..10_000 |> Enum.to_list()}
+      {ExCommanddo.Producer, interval: 5_000, jobs: ExCommanddo.tasks_from_range(1..10_000)}
     ]
 
     workers =
